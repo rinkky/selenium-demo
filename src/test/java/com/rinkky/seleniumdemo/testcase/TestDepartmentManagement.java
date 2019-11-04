@@ -1,55 +1,45 @@
 package com.rinkky.seleniumdemo.testcase;
 
-import com.rinkky.seleniumdemo.page.App;
-import com.rinkky.seleniumdemo.page.BasePage;
-import com.rinkky.util.XMLResourceBundleControl;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import com.rinkky.seleniumdemo.page.ContactsPage;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import org.hamcrest.Matchers;
 
-@RunWith(Parameterized.class)
-public class TestDepartmentManagement{
-    public static App app;
-    private static ResourceBundle resourceBundle;
+import static org.junit.Assert.assertThat;
 
+public class TestDepartmentManagement extends MultiLanguageCase{
+
+    private ContactsPage page;
     public TestDepartmentManagement(String lang) throws Exception {
-        resourceBundle = ResourceBundle.getBundle("uitext", new Locale(lang), new XMLResourceBundleControl());
-        app = getApp(resourceBundle);
-        app.changeLanguage(resourceBundle.getString("languageBtnText"));
+        super(lang);
     }
 
-    @Parameterized.Parameters
-    public static List data(){
-        return Arrays.asList(new String[][]{{"zh"},{""}});
+    @Before
+    public void before() throws Exception {
+        page = getApp().toContactsPage();
     }
-
-    public static App getApp(ResourceBundle res) throws Exception {
-        if(app != null){
-            return app;
-        }
-        return new App(res);
-    }
-
-    @AfterClass
-    public static void afterAll(){
-        app.driver.close();
-    }
-
     @Test
-    public void demo() throws InterruptedException {
-        Thread.sleep(10000);
-        assert true;
-    }
+    public void testManageDepartment() throws Exception {
+        page.renameRoot("ricky");
+        page.addDepartmentFromDialog("test-1", new String[]{"ricky"})
+                .addDepartmentFromDialog("test-1-1", new String[]{"ricky", "test-1"})
+                .addDepartmentFromDialog("test-1-2", new String[]{"ricky", "test-1"})
+                .addDepartmentFromDialog("test-1-3", new String[]{"ricky", "test-1"})
+                .addDepartmentFromDialog("test-2", new String[]{"ricky"});
+        List<String> secondLevelNames = page.getChildDepartments(new String[]{"ricky"});
+        assertThat(secondLevelNames, Matchers.contains("test-1", "test-2"));
 
-    @Test
-    public void createDepartment(){
+        List<String> names = page.getChildDepartments(new String[]{"ricky", "test-1"});
+        assertThat(names, Matchers.contains("test-1-1", "test-1-2", "test-1-3"));
 
+        page.moveUpDepartment(new String[]{"ricky", "test-1", "test-1-3"});
+        names = page.getChildDepartments(new String[]{"ricky", "test-1"});
+        assertThat(names, Matchers.contains("test-1-1", "test-1-3", "test-1-2"));
+
+        page.deleteDepartment(new String[]{"ricky", "test-1", "test-1-3"});
+        names = page.getChildDepartments(new String[]{"ricky", "test-1"});
+        assertThat(names, Matchers.not(Matchers.hasItem("test-1-3")));
     }
 }

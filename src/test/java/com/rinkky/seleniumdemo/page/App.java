@@ -1,5 +1,6 @@
 package com.rinkky.seleniumdemo.page;
 
+import com.rinkky.util.UiTextFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -13,16 +14,15 @@ import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
 public class App extends BasePage{
-    public final String url = "https://work.weixin.qq.com/";
-    public static ResourceBundle res;
+    private final String url = "https://work.weixin.qq.com/";
+    private static String confPath = "/conf/seleniumdemo/cookie.conf";
 
     public App() throws Exception {
-        res = ResourceBundle.getBundle("uitext", new Locale(""));
-        loginWithCookie();
+        this("");
     }
 
-    public App(ResourceBundle res) throws Exception {
-        App.res = res;
+    public App(String lang) throws Exception {
+        setLang(lang);
         loginWithCookie();
     }
 
@@ -31,13 +31,11 @@ public class App extends BasePage{
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         driver.get(url);
         driver.manage().window().maximize();
-        driver.findElement(By.linkText(res.getString("languageBtnText"))).click();
-        driver.findElement(By.linkText(res.getString("loginBtnText"))).click();
+        findElement(By.linkText(getUiRes().getString("languageBtnText"))).click();
+        findElement(By.linkText(getUiRes().getString("loginBtnText"))).click();
         Properties prop = new Properties();
-        prop.load(new FileInputStream("/conf/seleniumdemo/cookie.conf"));
+        prop.load(new FileInputStream(confPath));
         for (Object key : prop.keySet()){
-            System.out.println(key.toString());
-            System.out.println(prop.get(key).toString());
             driver.manage().addCookie(new Cookie(key.toString(), prop.get(key).toString()));
         }
         driver.navigate().refresh();
@@ -45,11 +43,21 @@ public class App extends BasePage{
     }
 
     public App changeLanguage(String lang){
+        setLang(lang);
         findClickable(By.cssSelector(".i18n_dropdown"), 5).click();
         findClickable(By.linkText(lang), 5).click();
         return this;
     }
     public ContactsPage toContactsPage(){
+        findClickable(By.id("menu_contacts")).click();
         return new ContactsPage();
+    }
+    public AssetPage toAssetPage(){
+        findClickable(By.id("menu_manageTools")).click();
+        findClickable(By.cssSelector(".ww_icon_AppMaterialBig")).click();
+        return new AssetPage();
+    }
+    public void quit(){
+        driver.quit();
     }
 }

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
+    <entry key="addDepartmentBtnText">添加部门</entry>
+    <entry key="changeDepartmentNameBtnText">修改名称</entry>
+    <entry key="chooseDepartmentBtnTxt">选择所属部门</entry>
+    <entry key="deleteDepartmentBtnText">删除</entry>
     <entry key="languageBtnText">中文</entry>
     <entry key="loginBtnText">企业登录</entry>
+    <entry key="moveDownBtnText">下移</entry>
+    <entry key="moveUpBtnText">上移</entry>
 </properties>
